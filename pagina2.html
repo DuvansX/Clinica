@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Seguimiento del Pedido</title>
+</head>
+<body>
+  <h2>Trabajador - Seguimiento</h2>
+  <button onclick="generarID()">Generar ID</button>
+  <button onclick="cancelarID()">Cancelar</button>
+  <p id="resultado"></p>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD7s5mmGYkvAFbCXZrYNwefh9RnmNwQuzi0",
+      authDomain: "idtrabajadores.firebaseapp.com",
+      projectId: "idtrabajadores",
+      storageBucket: "idtrabajadores.appspot.com",
+      messagingSenderId: "476040391869",
+      appId: "1:476040391869:web:342d794ed1aaf54ce49bd4",
+      measurementId: "G-9XR5E02ZZ2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let watchId = null;
+    let idPedido = null;
+
+    window.generarID = async function () {
+      idPedido = Math.floor(100000 + Math.random() * 900000).toString();
+      const ref = doc(db, "pedidos", idPedido);
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+          const { latitude, longitude } = pos.coords;
+
+          await setDoc(ref, {
+            id: idPedido,
+            ubicacion: { lat: latitude, lon: longitude },
+            activo: true,
+            timestamp: new Date()
+          });
+
+          document.getElementById("resultado").innerText = `ID generado: ${idPedido}`;
+        });
+
+        watchId = navigator.geolocation.watchPosition(async (pos) => {
+          const { latitude, longitude } = pos.coords;
+          await updateDoc(ref, {
+            ubicacion: { lat: latitude, lon: longitude },
+            timestamp: new Date()
+          });
+        });
+      } else {
+        alert("Geolocalización no soportada");
+      }
+    };
+
+    window.cancelarID = async function () {
+      if (watchId) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+
+        if (idPedido) {
+          const ref = doc(db, "pedidos", idPedido);
+          await updateDoc(ref, { activo: false });
+          document.getElementById("resultado").innerText = "Seguimiento cancelado.";
+          idPedido = null;
+        }
+      }
+    };
+  </script>
+</body>
+</html>

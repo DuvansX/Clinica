@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cliente - Seguimiento del Pedido</title>
+  <style>
+    #map {
+      height: 400px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h2>Cliente - Seguimiento de Pedido</h2>
+  <input type="text" id="inputID" placeholder="Ingresa tu ID de pedido" />
+  <button onclick="verUbicacion()">Ver ubicación</button>
+  <div id="map"></div>
+  <p id="estado"></p>
+
+  <!-- Firebase SDKs y lógica -->
+  <script>
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyD7s5mmGYkvAFbCXZrYNwefh9RnmNwQuzi0",
+      authDomain: "idtrabajadores.firebaseapp.com",
+      projectId: "idtrabajadores",
+      storageBucket: "idtrabajadores.appspot.com",
+      messagingSenderId: "476040391869",
+      appId: "1:476040391869:web:342d794ed1aaf54ce49bd4",
+      measurementId: "G-9XR5E02ZZ2"
+    };
+
+    let app, db, map, marker;
+
+    // Esta función será llamada por Google Maps
+    async function initMap() {
+      // Inicializa Firebase (solo una vez)
+      const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+      const { getFirestore, doc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+
+      app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+
+      // Inicializa un mapa vacío
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 4.60971, lng: -74.08175 }, // Bogotá por defecto
+        zoom: 12
+      });
+    }
+
+    // Función global para el botón
+    async function verUbicacion() {
+      const id = document.getElementById("inputID").value.trim();
+      if (!id || !db) return alert("Ingresa un ID válido o espera que cargue Firebase.");
+
+      const { doc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const docRef = doc(db, "pedidos", id);
+
+      onSnapshot(docRef, (docSnap) => {
+        if (!docSnap.exists()) {
+          document.getElementById("estado").innerText = "ID no encontrado.";
+          return;
+        }
+
+        const data = docSnap.data();
+        const { lat, lon } = data.ubicacion || {};
+
+        if (lat && lon) {
+          document.getElementById("estado").innerText = data.activo
+            ? "Repartidor en camino..."
+            : "Pedido finalizado.";
+
+          mostrarMapa(lat, lon);
+        } else {
+          document.getElementById("estado").innerText = "Ubicación no disponible aún.";
+        }
+      });
+    }
+
+    function mostrarMapa(lat, lon) {
+      const position = { lat, lng: lon };
+      if (!marker) {
+        marker = new google.maps.Marker({
+          position,
+          map
+        });
+      } else {
+        marker.setPosition(position);
+      }
+      map.setCenter(position);
+    }
+
+    // Hacer accesible globalmente
+    window.verUbicacion = verUbicacion;
+    window.initMap = initMap;
+  </script>
+
+  <!-- Google Maps API -->
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGD7q6pdLPd5FV7gyy0h1bK6a1F2eFnsY&callback=initMap">
+  </script>
+</body>
+</html>
