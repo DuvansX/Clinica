@@ -2,15 +2,136 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Seguimiento del Pedido</title>
+  <title>Login y Seguimiento</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: url('O5X8JM0.jpg') no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  width: 280px; /* un poco más estrecho */
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* centra horizontalmente los elementos */
+  border: #422d2d solid 4px;
+    }
+    input {
+  display: block;
+  width: 90%; /* más estrecho */
+  margin: 8px auto; /* centrado y menos espacio */
+  padding: 8px 10px; /* menos altura */
+  font-size: 14px; /* texto más pequeño */
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.08);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input:focus {
+  outline: none;
+  border-color: #000000;
+  box-shadow: 0 0 4px rgba(76, 175, 80, 0.4);
+}
+
+    input, button {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      background: #000000;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    .hidden {
+      display: none;
+    }
+    #resultado {
+      margin-top: 15px;
+    }
+    .logout-btn {
+  margin-top: 20px;
+  width: 45%;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 100px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #c0392b;
+}
+    .LoginButton {
+      background-color: #000000;
+      width: 50%;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 100px;
+      cursor: pointer;
+    }
+    .LoginButton:hover {
+      background-color: #00000093;
+    }
+    #message {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    #welcome-message {
+      font-size: 30px;
+      color: #ffffff;
+      margin-bottom: 20px;
+    }
+  </style>
 </head>
 <body>
-  <h2>Trabajador - Seguimiento</h2>
-  <button onclick="generarID()">Generar ID</button>
-  <button onclick="cancelarID()">Cancelar</button>
-  <p id="resultado"></p>
 
+  <!-- Login -->
+  <div class="container" id="login-container">
+    <h2>Iniciar sesión</h2>
+    <input type="text" id="username" placeholder="Usuario">
+    <input type="password" id="password" placeholder="Contraseña">
+    <button class="LoginButton" onclick="login()">Ingresar</button>
+    <p id="message"></p>
+  </div>
+
+  <!-- Generador de ID (oculto al inicio) -->
+  <div class="container hidden" id="main-container">
+    <div id="welcome-message" style="display: none; position: absolute; top: 30px; font-weight: bold;">
+      Bienvenido
+    </div>
+    
+    <h2>Menu Trabajador</h2>
+    <button onclick="generarID()">Generar ID</button>
+    <button onclick="cancelarID()">Cancelar</button>
+    <button class="logout-btn" onclick="cerrarSesion()">Cerrar sesión</button>
+
+    <p id="resultado"></p>
+  </div>
+
+  <!-- Scripts -->
   <script type="module">
+    // Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -29,6 +150,39 @@
 
     let watchId = null;
     let idPedido = null;
+
+    window.login = function () {
+  const user = document.getElementById('username').value;
+  const pass = document.getElementById('password').value;
+  const message = document.getElementById('message');
+
+  const users = [
+    { username: 'Pepito123', password: '1234abcd' },
+    { username: 'Pipemalo', password: '1054286882' },
+    { username: 'Strip3cm', password: 'Goticasculonas' }
+  ];
+
+  const validUser = users.find(u => u.username === user && u.password === pass);
+
+  if (validUser) {
+    message.style.color = 'green';
+    message.textContent = '¡Login exitoso!';
+    document.getElementById('login-container').classList.add('hidden');
+    document.getElementById('main-container').classList.remove('hidden');
+    document.getElementById('resultado').textContent = '';
+
+    // Mostrar mensaje de bienvenida con el usuario
+    const welcome = document.getElementById('welcome-message');
+    welcome.textContent = `Bienvenido ${validUser.username}`;
+    welcome.style.display = 'block';
+  } else {
+    message.style.color = 'red';
+    message.textContent = 'Usuario o contraseña incorrectos.';
+  }
+}
+
+
+    
 
     window.generarID = async function () {
       idPedido = Math.floor(100000 + Math.random() * 900000).toString();
@@ -58,7 +212,7 @@
       } else {
         alert("Geolocalización no soportada");
       }
-    };
+    }
 
     window.cancelarID = async function () {
       if (watchId) {
@@ -72,7 +226,18 @@
           idPedido = null;
         }
       }
-    };
+    }
+
+    window.cerrarSesion = function () {
+      cancelarID(); // cancela si hay uno activo
+      document.getElementById('main-container').classList.add('hidden');
+      document.getElementById('login-container').classList.remove('hidden');
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+      document.getElementById('message').textContent = '';
+      document.getElementById('resultado').textContent = '';
+    }
   </script>
+
 </body>
 </html>
