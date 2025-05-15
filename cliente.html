@@ -17,7 +17,6 @@
   <div id="map"></div>
   <p id="estado"></p>
 
-  <!-- Firebase SDKs y lógica -->
   <script>
     // Configuración de Firebase
     const firebaseConfig = {
@@ -30,25 +29,30 @@
       measurementId: "G-9XR5E02ZZ2"
     };
 
-    let app, db, map, marker;
+    let app, db, map;
+    let directionsService, directionsRenderer;
 
     // Esta función será llamada por Google Maps
     async function initMap() {
       // Inicializa Firebase (solo una vez)
       const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
-      const { getFirestore, doc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const { getFirestore } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
 
       app = initializeApp(firebaseConfig);
       db = getFirestore(app);
 
-      // Inicializa un mapa vacío
+      // Inicializa el mapa centrado en Bogotá por defecto
       map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: 4.60971, lng: -74.08175 }, // Bogotá por defecto
+        center: { lat: 4.60971, lng: -74.08175 },
         zoom: 12
       });
+
+      // Inicializa Directions
+      directionsService = new google.maps.DirectionsService();
+      directionsRenderer = new google.maps.DirectionsRenderer();
+      directionsRenderer.setMap(map);
     }
 
-    // Función global para el botón
     async function verUbicacion() {
       const id = document.getElementById("inputID").value.trim();
       if (!id || !db) return alert("Ingresa un ID válido o espera que cargue Firebase.");
@@ -59,6 +63,7 @@
       onSnapshot(docRef, (docSnap) => {
         if (!docSnap.exists()) {
           document.getElementById("estado").innerText = "ID no encontrado.";
+          directionsRenderer.set('directions', null); // Limpiar ruta si hay
           return;
         }
 
@@ -70,27 +75,66 @@
             ? "Repartidor en camino..."
             : "Pedido finalizado.";
 
-          mostrarMapa(lat, lon);
+          // Obtener la ubicación actual del cliente y mostrar ruta
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                const origen = {
+                  lat: pos.coords.latitude,
+                  lng: pos.coords.longitude
+                };
+                const destino = { lat, lng: lon };
+                calcularRuta(origen, destino);
+              },
+              () => {
+                alert("No se pudo obtener tu ubicación.");
+                // Si no hay ubicación, solo mostrar marcador del repartidor
+                mostrarMarcadorDestino(lat, lon);
+              }
+            );
+          } else {
+            alert("Tu navegador no soporta geolocalización.");
+            mostrarMarcadorDestino(lat, lon);
+          }
         } else {
           document.getElementById("estado").innerText = "Ubicación no disponible aún.";
+          directionsRenderer.set('directions', null); // Limpiar ruta si hay
         }
       });
     }
 
-    function mostrarMapa(lat, lon) {
-      const position = { lat, lng: lon };
-      if (!marker) {
-        marker = new google.maps.Marker({
-          position,
-          map
-        });
-      } else {
-        marker.setPosition(position);
-      }
-      map.setCenter(position);
+    // Muestra la ruta entre origen y destino
+    function calcularRuta(origen, destino) {
+      directionsService.route({
+        origin: origen,
+        destination: destino,
+        travelMode: google.maps.TravelMode.DRIVING
+      }, (response, status) => {
+        if (status === "OK") {
+          directionsRenderer.setDirections(response);
+        } else {
+          alert("Error al calcular la ruta: " + status);
+          mostrarMarcadorDestino(destino.lat, destino.lng);
+        }
+      });
     }
 
-    // Hacer accesible globalmente
+    // En caso de no poder calcular ruta, solo muestra marcador del destino
+    let markerDestino;
+    function mostrarMarcadorDestino(lat, lon) {
+      if (markerDestino) {
+        markerDestino.setPosition({ lat, lng: lon });
+      } else {
+        markerDestino = new google.maps.Marker({
+          position: { lat, lng: lon },
+          map: map,
+          title: "Posición del repartidor"
+        });
+      }
+      map.setCenter({ lat, lng: lon });
+    }
+
+    // Hacer accesibles globalmente
     window.verUbicacion = verUbicacion;
     window.initMap = initMap;
   </script>

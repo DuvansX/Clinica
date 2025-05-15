@@ -1,31 +1,24 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Login y Seguimiento</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>Login y Seguimiento con Mapa</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Font Awesome para íconos -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
+    /* Tu CSS original */
+    * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: url('Diseño\ sin\ título.png') no-repeat center center fixed;
+      background: url('Diseño sin título.png') no-repeat center center fixed;
       background-size: cover;
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      margin: 0; padding: 0; overflow: hidden;
+      display: flex; justify-content: center; align-items: center;
       height: 100vh;
     }
-
     .container {
       background: rgba(255, 255, 255, 0.95);
       padding: 30px 25px;
@@ -35,113 +28,61 @@
       width: 90%;
       text-align: center;
       border: #422d2d solid 3px;
-    }
-
-    h2 {
-      margin-bottom: 20px;
-      color: #333;
-    }
-
-    .input-group {
       position: relative;
-      margin-bottom: 16px;
     }
-
+    h2 { margin-bottom: 20px; color: #333; }
+    .input-group { position: relative; margin-bottom: 16px; }
     .input-group input {
-      width: 100%;
-      padding: 12px 36px 12px 36px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
+      width: 100%; padding: 12px 36px 12px 36px;
+      border: 1px solid #ccc; border-radius: 10px;
       font-size: 14px;
     }
-
     .input-group .fa {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
+      position: absolute; top: 50%; transform: translateY(-50%);
       color: #494949;
     }
-
-    .input-group .fa-user,
-    .input-group .fa-lock {
-      left: 12px;
-    }
-
-    .input-group .toggle-password {
-      right: 12px;
-    }
-
+    .input-group .fa-user, .input-group .fa-lock { left: 12px; }
+    .input-group .toggle-password { right: 12px; cursor: pointer; }
     button {
-      background: #000;
-      color: white;
-      padding: 12px;
-      border: none;
-      border-radius: 25px;
-      font-size: 16px;
-      cursor: pointer;
+      background: #000; color: white;
+      padding: 12px; border: none; border-radius: 25px;
+      font-size: 16px; cursor: pointer;
       transition: background 0.3s;
       width: 60%;
       margin: 10px auto;
     }
-
+    button:hover { background: #363636c4; }
     .btn-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
     }
-
-    button:hover {
-      background: #363636c4;
-    }
-
     .logout-btn {
-      background: #e74c3c;
-      padding: 8px 16px;
-      font-size: 14px;
-      border-radius: 20px;
-      width: auto;
+      background: #e74c3c; padding: 8px 16px;
+      font-size: 14px; border-radius: 20px; width: auto;
+      margin-top: 15px;
     }
-
-    .logout-btn:hover {
-      background: #c0392b;
-    }
-
-    #message {
-      font-size: 14px;
-      color: red;
-    }
-
+    .logout-btn:hover { background: #c0392b; }
+    #message { font-size: 14px; color: red; }
     #welcome-message {
-      font-size: 20px;
-      font-weight: bold;
-      color: #000;
-      margin-bottom: 15px;
+      font-size: 20px; font-weight: bold;
+      color: #000; margin-bottom: 15px;
     }
-
     #resultado {
       margin-top: 15px;
-      font-size: 16px;
-      font-weight: bold;
+      font-size: 16px; font-weight: bold;
       background: #5c5c5b;
-      color: rgb(255, 255, 255);
+      color: white;
       padding: 10px;
       border-radius: 12px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
+    .hidden { display: none; }
 
-    .hidden {
-      display: none;
-    }
-
-    @media screen and (max-width: 480px) {
-      .container {
-        padding: 20px;
-      }
-
-      button {
-        width: 100%;
-      }
+    /* Mapa dentro del main-container */
+    #map {
+      width: 100%; height: 250px;
+      border-radius: 12px;
+      margin: 15px 0;
+      box-shadow: 0 0 8px rgba(0,0,0,0.15);
     }
   </style>
 </head>
@@ -152,11 +93,11 @@
     <h2>Iniciar sesión</h2>
     <div class="input-group">
       <i class="fa fa-user"></i>
-      <input type="text" id="username" placeholder="Usuario">
+      <input type="text" id="username" placeholder="Usuario" />
     </div>
     <div class="input-group">
       <i class="fa fa-lock"></i>
-      <input type="password" id="password" placeholder="Contraseña">
+      <input type="password" id="password" placeholder="Contraseña" />
       <i class="fa fa-eye toggle-password" id="togglePassword"></i>
     </div>
     <button onclick="login()">Ingresar</button>
@@ -167,19 +108,23 @@
   <div class="container hidden" id="main-container">
     <div id="welcome-message"></div>
     <h2>Menú Trabajador</h2>
-    <button class="btn-icon" onclick="generarID()">
-      <i class="fa-solid fa-location-crosshairs"></i> Generar ID
+
+    <!-- Mapa para seleccionar destino -->
+    <div id="map"></div>
+
+    <button class="btn-icon" id="btn-generar-id" disabled>
+      <i class="fa-solid fa-location-crosshairs"></i> Confirmar destino y generar ID
     </button>
-    <button class="btn-icon" onclick="cancelarID()">
+
+    <button class="btn-icon" id="btn-cancelar">
       <i class="fa-solid fa-ban"></i> Cancelar
     </button>
+
     <button class="logout-btn btn-icon" onclick="cerrarSesion()">
       <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
     </button>
+
     <p id="resultado"></p>
-    <button class="btn-icon" onclick="copiarID()">
-      <i class="fa-solid fa-copy"></i> Copiar ID
-    </button>
   </div>
 
   <!-- Script Firebase + Funciones -->
@@ -200,15 +145,20 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    let watchId = null;
-    let idPedido = null;
-
     const users = [
       { username: 'Pepito123', password: '1234abcd' },
       { username: 'Pipemalo', password: '1054286882' },
       { username: 'Strip3cm', password: 'Goticasculonas' }
     ];
 
+    let idPedido = null;
+    let watchId = null;
+    let posicionActual = null;
+    let markerOrigen = null;
+    let markerDestino = null;
+    let map = null;
+
+    // Login
     window.login = function () {
       const user = document.getElementById('username').value.trim();
       const pass = document.getElementById('password').value.trim();
@@ -223,88 +173,169 @@
         document.getElementById('main-container').classList.remove('hidden');
         document.getElementById('resultado').textContent = '';
         document.getElementById('welcome-message').textContent = `Bienvenido, ${validUser.username}`;
+        iniciarMapa();
       } else {
         message.style.color = 'red';
         message.textContent = 'Usuario o contraseña incorrectos.';
       }
     };
 
-    window.generarID = async function () {
+    // Iniciar mapa
+    function iniciarMapa() {
+      if (!map) {
+        map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 15,
+          center: { lat: 0, lng: 0 },
+        });
+      }
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            posicionActual = {
+              lat: pos.coords.latitude,
+              lng: pos.coords.longitude
+            };
+            map.setCenter(posicionActual);
+
+            if (markerOrigen) {
+              markerOrigen.setPosition(posicionActual);
+            } else {
+              markerOrigen = new google.maps.Marker({
+                position: posicionActual,
+                map: map,
+                title: "Tu ubicación actual",
+                icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+              });
+            }
+          },
+          () => alert("No se pudo obtener tu ubicación.")
+        );
+      } else {
+        alert("Tu navegador no soporta geolocalización.");
+      }
+
+      // Al hacer click en mapa, poner marcador destino y habilitar botón
+      map.addListener("click", (e) => {
+        const latLng = e.latLng;
+        if (markerDestino) {
+          markerDestino.setPosition(latLng);
+        } else {
+          markerDestino = new google.maps.Marker({
+            position: latLng,
+            map: map,
+            title: "Destino",
+            icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+          });
+        }
+        document.getElementById('btn-generar-id').disabled = false;
+        document.getElementById('resultado').textContent = `Destino seleccionado: (${latLng.lat().toFixed(6)}, ${latLng.lng().toFixed(6)})`;
+      });
+    }
+
+    // Generar ID y guardar en Firestore
+    async function generarID() {
+      if (!markerDestino) {
+        alert("Por favor selecciona un destino en el mapa.");
+        return;
+      }
+
       idPedido = Math.floor(100000 + Math.random() * 900000).toString();
       const ref = doc(db, "pedidos", idPedido);
 
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (pos) => {
-          const { latitude, longitude } = pos.coords;
+      const destino = markerDestino.getPosition();
 
-          await setDoc(ref, {
-            id: idPedido,
-            ubicacion: { lat: latitude, lon: longitude },
-            activo: true,
-            timestamp: new Date()
-          });
+      if (!posicionActual) {
+        alert("No se pudo obtener la ubicación actual.");
+        return;
+      }
 
-          document.getElementById("resultado").innerText = `📍 ID generado: ${idPedido}`;
+      try {
+        await setDoc(ref, {
+          id: idPedido,
+          ubicacionOrigen: { lat: posicionActual.lat, lon: posicionActual.lng },
+          ubicacionDestino: { lat: destino.lat(), lon: destino.lng() },
+          activo: true,
+          timestamp: new Date()
         });
 
+        document.getElementById("resultado").textContent = `📍 ID generado: ${idPedido}`;
+
+        // Empezar a seguir ubicación actual y actualizar Firestore
+        if (watchId) navigator.geolocation.clearWatch(watchId);
         watchId = navigator.geolocation.watchPosition(async (pos) => {
-          const { latitude, longitude } = pos.coords;
+          posicionActual = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          if (markerOrigen) markerOrigen.setPosition(posicionActual);
           await updateDoc(ref, {
-            ubicacion: { lat: latitude, lon: longitude },
+            ubicacionOrigen: { lat: posicionActual.lat, lon: posicionActual.lng },
             timestamp: new Date()
           });
-        });
-      } else {
-        alert("Geolocalización no soportada");
+        }, (err) => console.error(err), { enableHighAccuracy: true });
+
+        document.getElementById('btn-generar-id').disabled = true;
+
+      } catch (error) {
+        alert("Error al guardar el pedido: " + error.message);
       }
-    };
+    }
 
-    window.cancelarID = async function () {
-      if (watchId) {
-        navigator.geolocation.clearWatch(watchId);
-        watchId = null;
-
-        if (idPedido) {
-          const ref = doc(db, "pedidos", idPedido);
-          await updateDoc(ref, { activo: false });
-          document.getElementById("resultado").innerText = "🛑 Seguimiento cancelado.";
-          idPedido = null;
-        }
+    // Cancelar pedido
+    function cancelarPedido() {
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+      idPedido = null;
+      if (markerDestino) {
+        markerDestino.setMap(null);
+        markerDestino = null;
       }
-    };
+      document.getElementById('btn-generar-id').disabled = true;
+      document.getElementById('resultado').textContent = 'Pedido cancelado.';
+    }
 
+    // Cerrar sesión
     window.cerrarSesion = function () {
-      cancelarID();
-      document.getElementById('main-container').classList.add('hidden');
-      document.getElementById('login-container').classList.remove('hidden');
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+      idPedido = null;
+      markerDestino = null;
+      markerOrigen = null;
+      map = null;
+      posicionActual = null;
+
       document.getElementById('username').value = '';
       document.getElementById('password').value = '';
       document.getElementById('message').textContent = '';
       document.getElementById('resultado').textContent = '';
+      document.getElementById('welcome-message').textContent = '';
+
+      document.getElementById('main-container').classList.add('hidden');
+      document.getElementById('login-container').classList.remove('hidden');
     };
 
-    window.copiarID = function () {
-      if (idPedido) {
-        navigator.clipboard.writeText(idPedido).then(() => {
-          alert(`ID ${idPedido} copiado al portapapeles`);
-        }).catch((err) => {
-          alert('Error al copiar el ID: ', err);
-        });
-      } else {
-        alert('No se ha generado un ID aún.');
-      }
-    };
 
-    document.getElementById('togglePassword').addEventListener('click', () => {
-      const passwordInput = document.getElementById('password');
-      const icon = document.getElementById('togglePassword');
-      const isPassword = passwordInput.type === 'password';
-      passwordInput.type = isPassword ? 'text' : 'password';
-      icon.classList.toggle('fa-eye');
-      icon.classList.toggle('fa-eye-slash');
+    map = new google.maps.Map(document.getElementById("map"), {
+  zoom: 15,
+  center: { lat: 0, lng: 0 },
+  streetViewControl: false,   // <-- esto quita el muñequito amarillo
+  mapTypeControl: false,      // <-- esto quita el selector de tipo de mapa (satélite, terreno...)
+});
+
+
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function () {
+      const passInput = document.getElementById('password');
+      const type = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passInput.setAttribute('type', type);
+      this.classList.toggle('fa-eye-slash');
     });
+
+    // Botones
+    document.getElementById('btn-generar-id').addEventListener('click', generarID);
+    document.getElementById('btn-cancelar').addEventListener('click', cancelarPedido);
   </script>
+
+  <!-- Google Maps JS API -->
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGD7q6pdLPd5FV7gyy0h1bK6a1F2eFnsY&callback=initMap">
+  </script>
+
 </body>
 </html>
-
-
