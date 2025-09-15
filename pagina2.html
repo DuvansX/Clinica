@@ -1,341 +1,1218 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Login y Seguimiento con Mapa</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Trabajadores - Localización Precisa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <!-- Font Awesome para íconos -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
 
-  <style>
-    /* Tu CSS original */
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: url('Diseño sin título.png') no-repeat center center fixed;
-      background-size: cover;
-      margin: 0; padding: 0; overflow: hidden;
-      display: flex; justify-content: center; align-items: center;
-      height: 100vh;
-    }
-    .container {
-      background: rgba(255, 255, 255, 0.95);
-      padding: 30px 25px;
-      border-radius: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-      max-width: 360px;
-      width: 90%;
-      text-align: center;
-      border: #422d2d solid 3px;
-      position: relative;
-    }
-    h2 { margin-bottom: 20px; color: #333; }
-    .input-group { position: relative; margin-bottom: 16px; }
-    .input-group input {
-      width: 100%; padding: 12px 36px 12px 36px;
-      border: 1px solid #ccc; border-radius: 10px;
-      font-size: 14px;
-    }
-    .input-group .fa {
-      position: absolute; top: 50%; transform: translateY(-50%);
-      color: #494949;
-    }
-    .input-group .fa-user, .input-group .fa-lock { left: 12px; }
-    .input-group .toggle-password { right: 12px; cursor: pointer; }
-    button {
-      background: #000; color: white;
-      padding: 12px; border: none; border-radius: 25px;
-      font-size: 16px; cursor: pointer;
-      transition: background 0.3s;
-      width: 60%;
-      margin: 10px auto;
-    }
-    button:hover { background: #363636c4; }
-    .btn-icon {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    .logout-btn {
-      background: #e74c3c; padding: 8px 16px;
-      font-size: 14px; border-radius: 20px; width: auto;
-      margin-top: 15px;
-    }
-    .logout-btn:hover { background: #c0392b; }
-    #message { font-size: 14px; color: red; }
-    #welcome-message {
-      font-size: 20px; font-weight: bold;
-      color: #000; margin-bottom: 15px;
-    }
-    #resultado {
-      margin-top: 15px;
-      font-size: 16px; font-weight: bold;
-      background: #5c5c5b;
-      color: white;
-      padding: 10px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .hidden { display: none; }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 420px;
+            width: 100%;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
 
-    /* Mapa dentro del main-container */
-    #map {
-      width: 100%; height: 250px;
-      border-radius: 12px;
-      margin: 15px 0;
-      box-shadow: 0 0 8px rgba(0,0,0,0.15);
-    }
-  </style>
+        /* Login Styles */
+        .login-section {
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .login-header {
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: #2d3748;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 16px 50px 16px 50px;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-group i {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+            font-size: 18px;
+        }
+
+        .input-group .fa-user,
+        .input-group .fa-lock {
+            left: 18px;
+        }
+
+        .input-group .toggle-password {
+            right: 18px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .input-group .toggle-password:hover {
+            color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .message {
+            font-size: 14px;
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .message.success {
+            background: #f0fff4;
+            color: #38a169;
+            border: 1px solid #9ae6b4;
+        }
+
+        .message.error {
+            background: #fed7d7;
+            color: #e53e3e;
+            border: 1px solid #feb2b2;
+        }
+
+        .message.info {
+            background: #ebf8ff;
+            color: #3182ce;
+            border: 1px solid #90cdf4;
+        }
+
+        /* Worker Menu Styles */
+        .worker-section {
+            display: none;
+        }
+
+        .worker-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .worker-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .worker-header .welcome {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .worker-content {
+            padding: 30px;
+        }
+
+        .location-status {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #48bb78;
+        }
+
+        .location-status.error {
+            border-left-color: #e53e3e;
+        }
+
+        .location-status.warning {
+            border-left-color: #ed8936;
+        }
+
+        .location-info {
+            font-size: 14px;
+            color: #4a5568;
+            margin-bottom: 5px;
+        }
+
+        .accuracy-info {
+            font-size: 12px;
+            color: #718096;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .accuracy-excellent { color: #38a169; }
+        .accuracy-good { color: #3182ce; }
+        .accuracy-fair { color: #ed8936; }
+        .accuracy-poor { color: #e53e3e; }
+
+        .map-container {
+            position: relative;
+            margin-bottom: 25px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        #map {
+            height: 300px;
+            width: 100%;
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2d3748;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            max-width: 200px;
+        }
+
+        .tracking-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(72, 187, 120, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 1000;
+            display: none;
+            animation: pulse 2s infinite;
+        }
+
+        .tracking-indicator.active {
+            display: block;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn-action {
+            padding: 16px 20px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn-action:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(72, 187, 120, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(237, 137, 54, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(245, 101, 101, 0.3);
+        }
+
+        .status-card {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .status-card h3 {
+            color: #2d3748;
+            font-size: 18px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-card p {
+            color: #4a5568;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-line;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                margin: 10px;
+                border-radius: 20px;
+            }
+            
+            .worker-content,
+            .login-section {
+                padding: 20px;
+            }
+            
+            #map {
+                height: 250px;
+            }
+        }
+    </style>
 </head>
 <body>
-
-  <!-- Login -->
-  <div class="container" id="login-container">
-    <h2>Iniciar sesión</h2>
-    <div class="input-group">
-      <i class="fa fa-user"></i>
-      <input type="text" id="username" placeholder="Usuario" />
+    <!-- Login Section -->
+    <div class="container" id="login-container">
+        <div class="login-section">
+            <div class="login-header">
+                <h1><i class="fas fa-user-hard-hat"></i> Sistema de Trabajadores</h1>
+                <p>Localización GPS de Alta Precisión</p>
+            </div>
+            
+            <form id="login-form">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="username" placeholder="Nombre de usuario" required>
+                </div>
+                
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Contraseña" required>
+                    <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" id="login-btn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Iniciar Sesión
+                </button>
+            </form>
+            
+            <div id="message" class="message hidden"></div>
+        </div>
     </div>
-    <div class="input-group">
-      <i class="fa fa-lock"></i>
-      <input type="password" id="password" placeholder="Contraseña" />
-      <i class="fa fa-eye toggle-password" id="togglePassword"></i>
+
+    <!-- Worker Menu Section -->
+    <div class="container hidden" id="worker-container">
+        <div class="worker-header">
+            <h1><i class="fas fa-satellite-dish"></i> Repartidor GPS</h1>
+            <div class="welcome" id="welcome-text"></div>
+        </div>
+        
+        <div class="worker-content">
+            <!-- Location Status Card -->
+            <div class="location-status" id="location-status">
+                <div class="location-info" id="location-info">
+                    <i class="fas fa-satellite fa-spin"></i> Iniciando sistema GPS de alta precisión...
+                </div>
+                <div class="accuracy-info" id="accuracy-info"></div>
+            </div>
+
+            <div class="map-container">
+                <div class="map-overlay" id="map-status">
+                    <i class="fas fa-crosshairs"></i> Calibrando GPS...
+                </div>
+                <div class="tracking-indicator" id="tracking-indicator">
+                    <i class="fas fa-broadcast-tower"></i> EN VIVO
+                </div>
+                <div id="map"></div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn-action btn-success" id="generate-btn" disabled>
+                    <i class="fas fa-route"></i>
+                    Confirmar Destino y Generar ID
+                </button>
+                
+                <button class="btn-action btn-warning" id="cancel-btn">
+                    <i class="fas fa-times-circle"></i>
+                    Cancelar Pedido
+                </button>
+                
+                <button class="btn-action btn-danger" id="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Cerrar Sesión
+                </button>
+            </div>
+            
+            <div id="status-card" class="status-card hidden">
+                <h3>
+                    <i class="fas fa-info-circle"></i>
+                    Estado del Pedido
+                </h3>
+                <p id="status-text"></p>
+            </div>
+        </div>
     </div>
-    <button onclick="login()">Ingresar</button>
-    <p id="message"></p>
-  </div>
 
-  <!-- Panel principal -->
-  <div class="container hidden" id="main-container">
-    <div id="welcome-message"></div>
-    <h2>Menú Trabajador</h2>
+    <script type="module">
+        // Firebase Configuration
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    <!-- Mapa para seleccionar destino -->
-    <div id="map"></div>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7s5mmGYkvAFbCXZrYNwefh9RnmNwQuzi0",
+            authDomain: "idtrabajadores.firebaseapp.com",
+            projectId: "idtrabajadores",
+            storageBucket: "idtrabajadores.appspot.com",
+            messagingSenderId: "476040391869",
+            appId: "1:476040391869:web:342d794ed1aaf54ce49bd4",
+            measurementId: "G-9XR5E02ZZ2"
+        };
 
-    <button class="btn-icon" id="btn-generar-id" disabled>
-      <i class="fa-solid fa-location-crosshairs"></i> Confirmar destino y generar ID
-    </button>
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-    <button class="btn-icon" id="btn-cancelar">
-      <i class="fa-solid fa-ban"></i> Cancelar
-    </button>
+        // User credentials
+        const users = [
+            { username: 'Pepito123', password: '1234abcd' },
+            { username: 'Pipemalo', password: '1054286882' },
+            { username: 'Strip3cm', password: 'Goticasculonas' }
+        ];
 
-    <button class="logout-btn btn-icon" onclick="cerrarSesion()">
-      <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
-    </button>
+        // Global variables
+        let currentUser = null;
+        let map = null;
+        let currentPosition = null;
+        let destinationPosition = null;
+        let markerOrigen = null;
+        let markerDestino = null;
+        let watchId = null;
+        let orderId = null;
+        let orderRef = null;
+        let trackingActive = false;
+        let updateInterval = null;
 
-    <p id="resultado"></p>
-  </div>
+        // DOM Elements
+        const loginContainer = document.getElementById('login-container');
+        const workerContainer = document.getElementById('worker-container');
+        const loginForm = document.getElementById('login-form');
+        const loginBtn = document.getElementById('login-btn');
+        const message = document.getElementById('message');
+        const welcomeText = document.getElementById('welcome-text');
+        const locationStatus = document.getElementById('location-status');
+        const locationInfo = document.getElementById('location-info');
+        const accuracyInfo = document.getElementById('accuracy-info');
+        const mapStatus = document.getElementById('map-status');
+        const trackingIndicator = document.getElementById('tracking-indicator');
+        const generateBtn = document.getElementById('generate-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const statusCard = document.getElementById('status-card');
+        const statusText = document.getElementById('status-text');
+        const togglePassword = document.getElementById('togglePassword');
 
-  <!-- Script Firebase + Funciones -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyD7s5mmGYkvAFbCXZrYNwefh9RnmNwQuzi0",
-      authDomain: "idtrabajadores.firebaseapp.com",
-      projectId: "idtrabajadores",
-      storageBucket: "idtrabajadores.appspot.com",
-      messagingSenderId: "476040391869",
-      appId: "1:476040391869:web:342d794ed1aaf54ce49bd4",
-      measurementId: "G-9XR5E02ZZ2"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const users = [
-      { username: 'Pepito123', password: '1234abcd' },
-      { username: 'Pipemalo', password: '1054286882' },
-      { username: 'Strip3cm', password: 'Goticasculonas' }
-    ];
-
-    let idPedido = null;
-    let watchId = null;
-    let posicionActual = null;
-    let markerOrigen = null;
-    let markerDestino = null;
-    let map = null;
-
-    // Login
-    window.login = function () {
-      const user = document.getElementById('username').value.trim();
-      const pass = document.getElementById('password').value.trim();
-      const message = document.getElementById('message');
-
-      const validUser = users.find(u => u.username === user && u.password === pass);
-
-      if (validUser) {
-        message.style.color = 'green';
-        message.textContent = '¡Login exitoso!';
-        document.getElementById('login-container').classList.add('hidden');
-        document.getElementById('main-container').classList.remove('hidden');
-        document.getElementById('resultado').textContent = '';
-        document.getElementById('welcome-message').textContent = `Bienvenido, ${validUser.username}`;
-        iniciarMapa();
-      } else {
-        message.style.color = 'red';
-        message.textContent = 'Usuario o contraseña incorrectos.';
-      }
-    };
-
-    // Iniciar mapa
-    function iniciarMapa() {
-      if (!map) {
-        map = new google.maps.Map(document.getElementById("map"), {
-          zoom: 15,
-          center: { lat: 0, lng: 0 },
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
         });
-      }
 
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            posicionActual = {
-              lat: pos.coords.latitude,
-              lng: pos.coords.longitude
-            };
-            map.setCenter(posicionActual);
-
-            if (markerOrigen) {
-              markerOrigen.setPosition(posicionActual);
-            } else {
-              markerOrigen = new google.maps.Marker({
-                position: posicionActual,
-                map: map,
-                title: "Tu ubicación actual",
-                icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-              });
-            }
-          },
-          () => alert("No se pudo obtener tu ubicación.")
-        );
-      } else {
-        alert("Tu navegador no soporta geolocalización.");
-      }
-
-      // Al hacer click en mapa, poner marcador destino y habilitar botón
-      map.addListener("click", (e) => {
-        const latLng = e.latLng;
-        if (markerDestino) {
-          markerDestino.setPosition(latLng);
-        } else {
-          markerDestino = new google.maps.Marker({
-            position: latLng,
-            map: map,
-            title: "Destino",
-            icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
-          });
+        function setupEventListeners() {
+            loginForm.addEventListener('submit', handleLogin);
+            togglePassword.addEventListener('click', togglePasswordVisibility);
+            generateBtn.addEventListener('click', generateOrder);
+            cancelBtn.addEventListener('click', cancelOrder);
+            logoutBtn.addEventListener('click', logout);
         }
-        document.getElementById('btn-generar-id').disabled = false;
-        document.getElementById('resultado').textContent = `Destino seleccionado: (${latLng.lat().toFixed(6)}, ${latLng.lng().toFixed(6)})`;
-      });
-    }
 
-    // Generar ID y guardar en Firestore
-    async function generarID() {
-      if (!markerDestino) {
-        alert("Por favor selecciona un destino en el mapa.");
-        return;
-      }
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!username || !password) {
+                showMessage('Por favor completa todos los campos', 'error');
+                return;
+            }
 
-      idPedido = Math.floor(100000 + Math.random() * 900000).toString();
-      const ref = doc(db, "pedidos", idPedido);
+            loginBtn.innerHTML = '<div class="loading"></div> Iniciando...';
+            loginBtn.disabled = true;
 
-      const destino = markerDestino.getPosition();
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
-      if (!posicionActual) {
-        alert("No se pudo obtener la ubicación actual.");
-        return;
-      }
+            const user = users.find(u => u.username === username && u.password === password);
 
-      try {
-        await setDoc(ref, {
-          id: idPedido,
-          ubicacionOrigen: { lat: posicionActual.lat, lon: posicionActual.lng },
-          ubicacionDestino: { lat: destino.lat(), lon: destino.lng() },
-          activo: true,
-          timestamp: new Date()
-        });
+            if (user) {
+                currentUser = user;
+                showMessage('Inicio de sesión exitoso!', 'success');
+                
+                setTimeout(() => {
+                    showWorkerPanel();
+                }, 1000);
+            } else {
+                showMessage('Usuario o contraseña incorrectos', 'error');
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
+                loginBtn.disabled = false;
+            }
+        }
 
-        document.getElementById("resultado").textContent = `📍 ID generado: ${idPedido}`;
+        function showWorkerPanel() {
+            loginContainer.classList.add('hidden');
+            workerContainer.classList.remove('hidden');
+            workerContainer.classList.add('fade-in');
+            welcomeText.textContent = `Bienvenido, ${currentUser.username}!`;
+            
+            setTimeout(() => {
+                initializeMap();
+            }, 300);
+        }
 
-        // Empezar a seguir ubicación actual y actualizar Firestore
-        if (watchId) navigator.geolocation.clearWatch(watchId);
-        watchId = navigator.geolocation.watchPosition(async (pos) => {
-          posicionActual = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          if (markerOrigen) markerOrigen.setPosition(posicionActual);
-          await updateDoc(ref, {
-            ubicacionOrigen: { lat: posicionActual.lat, lon: posicionActual.lng },
-            timestamp: new Date()
-          });
-        }, (err) => console.error(err), { enableHighAccuracy: true });
+        function initializeMap() {
+            // Inicializar Google Maps con configuración optimizada
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 18,
+                center: { lat: 5.5331, lng: -73.3678 }, // Tunja por defecto
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false,
+                zoomControl: true,
+                gestureHandling: 'greedy',
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            });
 
-        document.getElementById('btn-generar-id').disabled = true;
+            // Obtener ubicación automáticamente con alta precisión
+            obtenerUbicacionPrecisa();
 
-      } catch (error) {
-        alert("Error al guardar el pedido: " + error.message);
-      }
-    }
+            // Configurar click handler para selección de destino
+            map.addListener("click", handleMapClick);
+        }
 
-    // Cancelar pedido
-    function cancelarPedido() {
-      if (watchId) navigator.geolocation.clearWatch(watchId);
-      idPedido = null;
-      if (markerDestino) {
-        markerDestino.setMap(null);
-        markerDestino = null;
-      }
-      document.getElementById('btn-generar-id').disabled = true;
-      document.getElementById('resultado').textContent = 'Pedido cancelado.';
-    }
+        function obtenerUbicacionPrecisa() {
+            updateLocationInfo('Obteniendo ubicación GPS de máxima precisión...', 'warning');
 
-    // Cerrar sesión
-    window.cerrarSesion = function () {
-      if (watchId) navigator.geolocation.clearWatch(watchId);
-      idPedido = null;
-      markerDestino = null;
-      markerOrigen = null;
-      map = null;
-      posicionActual = null;
+            if (!navigator.geolocation) {
+                updateLocationInfo('Tu navegador no soporta geolocalización GPS', 'error');
+                return;
+            }
 
-      document.getElementById('username').value = '';
-      document.getElementById('password').value = '';
-      document.getElementById('message').textContent = '';
-      document.getElementById('resultado').textContent = '';
-      document.getElementById('welcome-message').textContent = '';
+            // OPCIONES ULTRA PRECISAS - Forzar máxima precisión
+            const ultraPrecisionOptions = {
+                enableHighAccuracy: true,
+                timeout: 60000,      // 60 segundos - dar más tiempo para precisión
+                maximumAge: 0        // NUNCA usar ubicación en cache
+            };
 
-      document.getElementById('main-container').classList.add('hidden');
-      document.getElementById('login-container').classList.remove('hidden');
-    };
+            // Intentar múltiples veces para obtener la mejor precisión
+            let intentos = 0;
+            let mejorPrecision = Infinity;
+            let mejorPosicion = null;
 
+            function obtenerMejorUbicacion() {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        intentos++;
+                        const accuracy = position.coords.accuracy;
+                        
+                        console.log(`Intento ${intentos}: Precisión ±${accuracy}m`);
+                        
+                        // Si esta ubicación es más precisa, guardarla
+                        if (accuracy < mejorPrecision) {
+                            mejorPrecision = accuracy;
+                            mejorPosicion = {
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude,
+                                accuracy: accuracy,
+                                speed: position.coords.speed || 0,
+                                heading: position.coords.heading || 0,
+                                timestamp: Date.now()
+                            };
+                            
+                            console.log(`Nueva mejor precisión: ±${accuracy}m`);
+                            updateLocationInfo(`Mejorando precisión GPS... ±${accuracy}m (Intento ${intentos})`, 'warning');
+                        }
 
-    map = new google.maps.Map(document.getElementById("map"), {
-  zoom: 15,
-  center: { lat: 0, lng: 0 },
-  streetViewControl: false,   // <-- esto quita el muñequito amarillo
-  mapTypeControl: false,      // <-- esto quita el selector de tipo de mapa (satélite, terreno...)
-});
+                        // Si ya tenemos buena precisión (≤10m) o hemos intentado 5 veces, usar la mejor
+                        if (accuracy <= 10 || intentos >= 5) {
+                            usarMejorUbicacion(mejorPosicion);
+                        } else {
+                            // Intentar de nuevo en 2 segundos
+                            setTimeout(obtenerMejorUbicacion, 2000);
+                        }
+                    },
+                    (error) => {
+                        console.error(`Error en intento ${intentos + 1}:`, error);
+                        intentos++;
+                        
+                        if (intentos < 5) {
+                            setTimeout(obtenerMejorUbicacion, 3000);
+                        } else if (mejorPosicion) {
+                            usarMejorUbicacion(mejorPosicion);
+                        } else {
+                            handleLocationError(error);
+                        }
+                    },
+                    ultraPrecisionOptions
+                );
+            }
 
+            // Iniciar proceso de obtención de mejor ubicación
+            obtenerMejorUbicacion();
+        }
 
-    // Toggle password visibility
-    document.getElementById('togglePassword').addEventListener('click', function () {
-      const passInput = document.getElementById('password');
-      const type = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      passInput.setAttribute('type', type);
-      this.classList.toggle('fa-eye-slash');
-    });
+        function usarMejorUbicacion(posicion) {
+            currentPosition = {
+                lat: posicion.lat,
+                lng: posicion.lng
+            };
 
-    // Botones
-    document.getElementById('btn-generar-id').addEventListener('click', generarID);
-    document.getElementById('btn-cancelar').addEventListener('click', cancelarPedido);
-  </script>
+            const accuracy = Math.round(posicion.accuracy);
+            console.log('MEJOR UBICACIÓN SELECCIONADA:', currentPosition, `Precisión: ±${accuracy}m`);
 
-  <!-- Google Maps JS API -->
-  <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGD7q6pdLPd5FV7gyy0h1bK6a1F2eFnsY&callback=initMap">
-  </script>
+            // Centrar mapa en la ubicación más precisa
+            map.setCenter(currentPosition);
+            map.setZoom(20); // Zoom máximo para mayor detalle
 
+            // Crear marcador ultra preciso
+            if (markerOrigen) {
+                markerOrigen.setPosition(currentPosition);
+            } else {
+                markerOrigen = new google.maps.Marker({
+                    position: currentPosition,
+                    map: map,
+                    title: "Ubicación GPS Ultra Precisa",
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 15,
+                        fillColor: "#00FF00", // Verde brillante para indicar alta precisión
+                        fillOpacity: 0.9,
+                        strokeColor: "#FFFFFF",
+                        strokeWeight: 4
+                    },
+                    animation: google.maps.Animation.BOUNCE
+                });
+
+                // Parar animación después de 3 segundos
+                setTimeout(() => {
+                    markerOrigen.setAnimation(null);
+                }, 3000);
+
+                // InfoWindow con información detallada
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <div style="text-align: center; padding: 10px;">
+                            <strong>🎯 UBICACIÓN ULTRA PRECISA</strong><br>
+                            <small>Lat: ${currentPosition.lat.toFixed(10)}<br>
+                            Lng: ${currentPosition.lng.toFixed(10)}</small><br>
+                            <span style="color: #00AA00; font-weight: bold;">Precisión: ±${accuracy}m</span><br>
+                            <small>Velocidad: ${Math.round(posicion.speed * 3.6)} km/h</small><br>
+                            <small>Obtenida: ${new Date().toLocaleTimeString()}</small>
+                        </div>
+                    `
+                });
+
+                markerOrigen.addListener("click", () => {
+                    infoWindow.open(map, markerOrigen);
+                });
+
+                // Mostrar InfoWindow automáticamente
+                infoWindow.open(map, markerOrigen);
+                setTimeout(() => infoWindow.close(), 5000);
+            }
+
+            // Actualizar interfaz con la mejor precisión
+            updateLocationInterface(accuracy);
+
+            // Iniciar seguimiento continuo ULTRA AGRESIVO
+            iniciarSeguimientoUltraAgresivo();
+        }
+
+        function iniciarSeguimientoUltraAgresivo() {
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+            }
+
+            // OPCIONES ULTRA AGRESIVAS para seguimiento continuo
+            const ultraTrackingOptions = {
+                enableHighAccuracy: true,
+                timeout: 15000,      // 15 segundos timeout
+                maximumAge: 0        // SIEMPRE datos frescos
+            };
+
+            updateLocationInfo('🚀 RASTREO ULTRA PRECISO ACTIVADO', 'info');
+
+            watchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const newPosition = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+
+                    // ACTUALIZAR SIEMPRE - Sin filtros que limiten la precisión
+                    currentPosition = newPosition;
+                    const accuracy = Math.round(position.coords.accuracy);
+
+                    console.log(`🎯 UBICACIÓN ULTRA PRECISA: ${newPosition.lat.toFixed(10)}, ${newPosition.lng.toFixed(10)} (±${accuracy}m)`);
+
+                    // Actualizar marcador inmediatamente
+                    if (markerOrigen) {
+                        markerOrigen.setPosition(currentPosition);
+                        
+                        // Cambiar color según precisión
+                        let color = "#FF0000"; // Rojo por defecto
+                        if (accuracy <= 5) color = "#00FF00";      // Verde - Excelente
+                        else if (accuracy <= 15) color = "#FFAA00"; // Naranja - Buena
+                        else if (accuracy <= 30) color = "#FFFF00"; // Amarillo - Regular
+                        
+                        markerOrigen.setIcon({
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 15,
+                            fillColor: color,
+                            fillOpacity: 0.9,
+                            strokeColor: "#FFFFFF",
+                            strokeWeight: 4
+                        });
+                    }
+
+                    // Actualizar interfaz inmediatamente
+                    updateLocationInterface(accuracy);
+
+                    // Si hay seguimiento activo, actualizar Firebase inmediatamente
+                    if (trackingActive && orderRef) {
+                        actualizarFirebase();
+                    }
+                },
+                (error) => {
+                    console.error('❌ Error en rastreo ultra agresivo:', error);
+                    
+                    // Reintentar inmediatamente sin pausa
+                    setTimeout(() => {
+                        iniciarSeguimientoUltraAgresivo();
+                    }, 1000);
+                },
+                ultraTrackingOptions
+            );
+
+            console.log('🚀 RASTREO ULTRA AGRESIVO INICIADO');
+        }
+
+        function updateLocationInterface(accuracy) {
+            let accuracyClass = 'accuracy-poor';
+            let accuracyText = 'Baja';
+            let statusIcon = '';
+
+            if (accuracy <= 5) {
+                accuracyClass = 'accuracy-excellent';
+                accuracyText = 'Excelente';
+                statusIcon = '';
+                locationStatus.style.borderLeftColor = '#38a169';
+            } else if (accuracy <= 15) {
+                accuracyClass = 'accuracy-good';
+                accuracyText = 'Buena';  
+                statusIcon = '';
+                locationStatus.style.borderLeftColor = '#3182ce';
+            } else if (accuracy <= 50) {
+                accuracyClass = 'accuracy-fair';
+                accuracyText = 'Regular';
+                statusIcon = '';
+                locationStatus.style.borderLeftColor = '#ed8936';
+            } else {
+                statusIcon = '';
+                locationStatus.style.borderLeftColor = '#e53e3e';
+            }
+
+            locationInfo.innerHTML = `${statusIcon} GPS Activo - Precisión: ${accuracyText} (±${accuracy}m)`;
+            accuracyInfo.innerHTML = `
+                <i class="fas fa-map-marker-alt"></i> Lat: ${currentPosition.lat.toFixed(6)}, Lng: ${currentPosition.lng.toFixed(6)}
+                <span style="margin-left: 10px;"><i class="fas fa-clock"></i> ${new Date().toLocaleTimeString()}</span>
+            `;
+            accuracyInfo.className = `accuracy-info ${accuracyClass}`;
+
+            if (!destinationPosition) {
+                mapStatus.innerHTML = '<i class="fas fa-check-circle"></i> GPS Listo - Selecciona destino';
+            }
+        }
+
+        function handleMapClick(event) {
+            if (!currentPosition) {
+                showMessage('Esperando ubicación GPS precisa...', 'error');
+                return;
+            }
+
+            if (trackingActive) {
+                showMessage('No puedes cambiar el destino durante un pedido activo', 'error');
+                return;
+            }
+
+            const clickedLocation = event.latLng;
+            destinationPosition = {
+                lat: clickedLocation.lat(),
+                lng: clickedLocation.lng()
+            };
+
+            // Remover marcador anterior si existe
+            if (markerDestino) {
+                markerDestino.setMap(null);
+            }
+
+            // Crear marcador de destino
+            markerDestino = new google.maps.Marker({
+                position: destinationPosition,
+                map: map,
+                title: "Destino seleccionado",
+                icon: {
+                    path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                    scale: 6,
+                    fillColor: "#EA4335",
+                    fillOpacity: 1,
+                    strokeColor: "#ffffff",
+                    strokeWeight: 2
+                },
+                animation: google.maps.Animation.BOUNCE
+            });
+
+            // Parar animación después de 2 segundos
+            setTimeout(() => {
+                markerDestino.setAnimation(null);
+            }, 2000);
+
+            // Calcular distancia
+            const distancia = calcularDistancia(currentPosition, destinationPosition);
+
+            // InfoWindow del destino
+            const destinoInfo = new google.maps.InfoWindow({
+                content: `
+                    <div style="text-align: center; padding: 8px;">
+                        <strong>Destino Seleccionado</strong><br>
+                        <small>Lat: ${destinationPosition.lat.toFixed(6)}<br>
+                        Lng: ${destinationPosition.lng.toFixed(6)}</small><br>
+                        <span style="color: #3182ce;">Distancia: ${distancia.toFixed(2)} km</span>
+                    </div>
+                `
+            });
+
+            markerDestino.addListener("click", () => {
+                destinoInfo.open(map, markerDestino);
+            });
+
+            // Mostrar InfoWindow por defecto
+            destinoInfo.open(map, markerDestino);
+
+            // Habilitar botón de generar pedido
+            generateBtn.disabled = false;
+            mapStatus.innerHTML = '<i class="fas fa-check-circle"></i> Destino confirmado - Listo para generar pedido';
+            
+            showStatusCard(`Destino Seleccionado\nDistancia aproximada: ${distancia.toFixed(2)} km\nPrecisión GPS activa`);
+        }
+
+        async function generateOrder() {
+            if (!currentPosition || !destinationPosition) {
+                showMessage('Faltan datos de ubicación', 'error');
+                return;
+            }
+
+            generateBtn.innerHTML = '<div class="loading"></div> Generando pedido...';
+            generateBtn.disabled = true;
+
+            try {
+                // Generar ID único
+                orderId = Math.floor(100000 + Math.random() * 900000).toString();
+                orderRef = doc(db, "pedidos", orderId);
+
+                // Crear documento en Firebase
+                await setDoc(orderRef, {
+                    id: orderId,
+                    usuario: currentUser.username,
+                    ubicacionOrigen: { 
+                        lat: currentPosition.lat, 
+                        lng: currentPosition.lng 
+                    },
+                    ubicacionDestino: { 
+                        lat: destinationPosition.lat, 
+                        lng: destinationPosition.lng 
+                    },
+                    activo: true,
+                    fechaCreacion: new Date().toISOString(),
+                    ultimaActualizacion: new Date().toISOString(),
+                    estadoPedido: 'En Curso'
+                });
+
+                // Activar seguimiento en tiempo real
+                trackingActive = true;
+                trackingIndicator.classList.add('active');
+                
+                // Cambiar estado de botones
+                generateBtn.innerHTML = '<i class="fas fa-satellite-dish"></i> Rastreo Activo';
+                generateBtn.classList.remove('btn-success');
+                generateBtn.classList.add('btn-warning');
+                
+                // Iniciar actualizaciones automáticas a Firebase cada 3 segundos
+                startRealTimeFirebaseUpdates();
+                
+                mapStatus.innerHTML = '<i class="fas fa-satellite-dish"></i> RASTREO EN VIVO - Pedido activo';
+                locationStatus.style.borderLeftColor = '#48bb78';
+                
+                showStatusCard(`ID: ${orderId}\nPEDIDO ACTIVO\nRastreo GPS en tiempo real\nActualizando automáticamente`);
+                
+                showMessage('Pedido generado! Rastreo GPS en tiempo real activado', 'success');
+                
+                console.log('PEDIDO ACTIVO - ID:', orderId);
+
+            } catch (error) {
+                console.error('Error generando pedido:', error);
+                showMessage('Error al generar el pedido: ' + error.message, 'error');
+                
+                generateBtn.innerHTML = '<i class="fas fa-route"></i> Confirmar Destino y Generar ID';
+                generateBtn.disabled = false;
+            }
+        }
+
+        function startRealTimeFirebaseUpdates() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+
+            // Actualizar Firebase cada 3 segundos
+            updateInterval = setInterval(() => {
+                if (trackingActive && currentPosition && orderRef) {
+                    actualizarFirebase();
+                }
+            }, 3000);
+
+            console.log('Actualizaciones automáticas de Firebase iniciadas (cada 3s)');
+        }
+
+        async function actualizarFirebase() {
+            if (!trackingActive || !currentPosition || !orderRef) return;
+
+            try {
+                await updateDoc(orderRef, {
+                    ubicacionOrigen: {
+                        lat: currentPosition.lat,
+                        lng: currentPosition.lng
+                    },
+                    ultimaActualizacion: new Date().toISOString(),
+                    timestamp: new Date()
+                });
+
+                console.log('Firebase actualizado:', new Date().toLocaleTimeString());
+
+                // Actualizar status card con información en tiempo real
+                const distanceToDestination = destinationPosition ? 
+                    calcularDistancia(currentPosition, destinationPosition) : 0;
+                
+                showStatusCard(
+                    `ID: ${orderId}\n` +
+                    `RASTREANDO EN VIVO\n` +
+                    `Lat: ${currentPosition.lat.toFixed(8)}\n` +
+                    `Lng: ${currentPosition.lng.toFixed(8)}\n` +
+                    `Distancia al destino: ${distanceToDestination.toFixed(2)} km\n` +
+                    `Actualizado: ${new Date().toLocaleTimeString()}`
+                );
+
+            } catch (error) {
+                console.error('Error actualizando Firebase:', error);
+                showMessage('Error actualizando servidor - Reintentando...', 'error');
+            }
+        }
+
+        function handleLocationError(error) {
+            let errorMessage = '';
+            
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage = 'Permisos GPS denegados - Habilita ubicación';
+                    locationStatus.style.borderLeftColor = '#e53e3e';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage = 'Señal GPS no disponible - Sal al exterior';
+                    locationStatus.style.borderLeftColor = '#ed8936';
+                    break;
+                case error.TIMEOUT:
+                    errorMessage = 'Tiempo agotado GPS - Reintentando...';
+                    locationStatus.style.borderLeftColor = '#ed8936';
+                    break;
+                default:
+                    errorMessage = 'Error GPS - Reintentando conexión...';
+                    locationStatus.style.borderLeftColor = '#e53e3e';
+            }
+            
+            locationInfo.innerHTML = errorMessage;
+            accuracyInfo.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Reintentando conexión GPS...';
+            
+            console.error('Error GPS:', error);
+            
+            // Reintentar automáticamente cada 5 segundos
+            setTimeout(() => {
+                console.log('Reintentando conexión GPS...');
+                obtenerUbicacionPrecisa();
+            }, 5000);
+        }
+
+        function cancelOrder() {
+            if (!trackingActive) {
+                showMessage('No hay pedido activo para cancelar', 'info');
+                return;
+            }
+
+            // Parar seguimiento activo
+            trackingActive = false;
+            trackingIndicator.classList.remove('active');
+            
+            // Limpiar intervalos
+            if (updateInterval) {
+                clearInterval(updateInterval);
+                updateInterval = null;
+            }
+
+            // Resetear marcador destino
+            if (markerDestino) {
+                markerDestino.setMap(null);
+                markerDestino = null;
+            }
+
+            destinationPosition = null;
+            orderRef = null;
+            orderId = null;
+            
+            // Resetear botones
+            generateBtn.innerHTML = '<i class="fas fa-route"></i> Confirmar Destino y Generar ID';
+            generateBtn.classList.remove('btn-warning');
+            generateBtn.classList.add('btn-success');
+            generateBtn.disabled = true;
+            
+            statusCard.classList.add('hidden');
+            mapStatus.innerHTML = '<i class="fas fa-check-circle"></i> GPS Activo - Selecciona destino';
+            locationStatus.style.borderLeftColor = '#48bb78';
+            
+            showMessage('Pedido cancelado - GPS continúa activo', 'success');
+            console.log('Pedido cancelado');
+        }
+
+        function logout() {
+            // Cancelar todos los seguimientos
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            
+            if (updateInterval) {
+                clearInterval(updateInterval);
+                updateInterval = null;
+            }
+
+            // Reset variables
+            trackingActive = false;
+            currentUser = null;
+            map = null;
+            currentPosition = null;
+            destinationPosition = null;
+            markerOrigen = null;
+            markerDestino = null;
+            orderId = null;
+            orderRef = null;
+
+            // Reset form
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('message').classList.add('hidden');
+            
+            // Reset UI
+            generateBtn.disabled = true;
+            statusCard.classList.add('hidden');
+            trackingIndicator.classList.remove('active');
+            
+            // Show login
+            workerContainer.classList.add('hidden');
+            loginContainer.classList.remove('hidden');
+            loginContainer.classList.add('fade-in');
+            
+            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
+            loginBtn.disabled = false;
+            
+            console.log('Sesión cerrada');
+        }
+
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            togglePassword.classList.toggle('fa-eye');
+            togglePassword.classList.toggle('fa-eye-slash');
+        }
+
+        function calcularDistancia(pos1, pos2) {
+            const R = 6371; // Radio de la Tierra en km
+            const dLat = (pos2.lat - pos1.lat) * Math.PI / 180;
+            const dLng = (pos2.lng - pos1.lng) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(pos1.lat * Math.PI / 180) * Math.cos(pos2.lat * Math.PI / 180) *
+                    Math.sin(dLng/2) * Math.sin(dLng/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = `message ${type}`;
+            message.classList.remove('hidden');
+            
+            setTimeout(() => {
+                message.classList.add('hidden');
+            }, 5000);
+        }
+
+        function updateLocationInfo(text, type) {
+            locationInfo.innerHTML = text;
+            locationStatus.className = `location-status ${type}`;
+        }
+
+        function showStatusCard(text) {
+            statusText.textContent = text;
+            statusCard.classList.remove('hidden');
+        }
+
+        // Hacer funciones globales para Google Maps callback
+        window.initMap = function() {
+            // Esta función se llama automáticamente por Google Maps
+            console.log('Google Maps API cargada');
+        };
+
+        console.log('Sistema GPS de Alta Precisión inicializado');
+    </script>
+
+    <!-- Google Maps API -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAGD7q6pdLPd5FV7gyy0h1bK6a1F2eFnsY&callback=initMap">
+    </script>
 </body>
+</html>
 </html>
